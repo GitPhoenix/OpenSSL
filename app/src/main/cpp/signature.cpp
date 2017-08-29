@@ -222,23 +222,23 @@ Java_com_alley_openssl_util_JniUtils_encodeByAES(JNIEnv *env, jobject instance, 
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jsize src_Len = env->GetArrayLength(src_);
 
-    int mlen = 0, cipherText_len = 0;
+    int outlen = 0, cipherText_len = 0;
 
-    unsigned char *cipherText = (unsigned char *) malloc(src_Len);
+    unsigned char *out = (unsigned char *) malloc(src_Len);
     //清空内存空间
-    memset(cipherText, 0, src_Len);
+    memset(out, 0, src_Len);
 
     EVP_CIPHER_CTX ctx;
     EVP_CIPHER_CTX_init(&ctx);
     LOGI("AES->指定加密算法，初始化加密key/iv");
     EVP_EncryptInit_ex(&ctx, EVP_aes_128_cbc(), NULL, (const unsigned char *) keys, iv);
     LOGI("AES->进行加密操作");
-    EVP_EncryptUpdate(&ctx, cipherText, &mlen, (const unsigned char *) src, src_Len);
-    cipherText_len = mlen;
+    EVP_EncryptUpdate(&ctx, out, &outlen, (const unsigned char *) src, src_Len);
+    cipherText_len = outlen;
 
     LOGI("AES->结束加密操作");
-    EVP_EncryptFinal_ex(&ctx, cipherText + mlen, &mlen);
-    cipherText_len += mlen;
+    EVP_EncryptFinal_ex(&ctx, out + outlen, &outlen);
+    cipherText_len += outlen;
 
     LOGI("AES->EVP_CIPHER_CTX_cleanup");
     EVP_CIPHER_CTX_cleanup(&ctx);
@@ -249,9 +249,9 @@ Java_com_alley_openssl_util_JniUtils_encodeByAES(JNIEnv *env, jobject instance, 
 
     jbyteArray signature = env->NewByteArray(cipherText_len);
     LOGI("AES->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
-    env->SetByteArrayRegion(signature, 0, cipherText_len, (jbyte *) cipherText);
+    env->SetByteArrayRegion(signature, 0, cipherText_len, (jbyte *) out);
     LOGI("AES->释放内存");
-    free(cipherText);
+    free(out);
 
     return signature;
 }
@@ -264,22 +264,22 @@ Java_com_alley_openssl_util_JniUtils_decodeByAES(JNIEnv *env, jobject instance, 
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jsize src_Len = env->GetArrayLength(src_);
 
-    int mlen = 0, plaintext_len = 0;
+    int outlen = 0, plaintext_len = 0;
 
-    unsigned char *plaintext  = (unsigned char *) malloc(src_Len);
-    memset(plaintext, 0, src_Len);
+    unsigned char *out  = (unsigned char *) malloc(src_Len);
+    memset(out, 0, src_Len);
 
     EVP_CIPHER_CTX ctx;
     EVP_CIPHER_CTX_init(&ctx);
     LOGI("AES->指定解密算法，初始化解密key/iv");
     EVP_DecryptInit_ex(&ctx, EVP_aes_128_cbc(), NULL, (const unsigned char *) keys, iv);
     LOGI("AES->进行解密操作");
-    EVP_DecryptUpdate(&ctx, plaintext, &mlen, (const unsigned char *) src, src_Len);
-    plaintext_len = mlen;
+    EVP_DecryptUpdate(&ctx, out, &outlen, (const unsigned char *) src, src_Len);
+    plaintext_len = outlen;
 
     LOGI("AES->结束解密操作");
-    EVP_DecryptFinal_ex(&ctx, plaintext + mlen, &mlen);
-    plaintext_len += mlen;
+    EVP_DecryptFinal_ex(&ctx, out + outlen, &outlen);
+    plaintext_len += outlen;
 
     LOGI("AES->EVP_CIPHER_CTX_cleanup");
     EVP_CIPHER_CTX_cleanup(&ctx);
@@ -290,9 +290,9 @@ Java_com_alley_openssl_util_JniUtils_decodeByAES(JNIEnv *env, jobject instance, 
 
     jbyteArray signature = env->NewByteArray(plaintext_len);
     LOGI("AES->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
-    env->SetByteArrayRegion(signature, 0, plaintext_len, (jbyte *) plaintext);
+    env->SetByteArrayRegion(signature, 0, plaintext_len, (jbyte *) out);
     LOGI("AES->释放内存");
-    free(plaintext);
+    free(out);
 
     return signature;
 }
@@ -606,6 +606,7 @@ Java_com_alley_openssl_util_JniUtils_verifyByRSAPubKey(JNIEnv *env, jobject inst
     jbyte *keys = env->GetByteArrayElements(keys_, NULL);
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jbyte *sign = env->GetByteArrayElements(sign_, NULL);
+
     jsize src_Len = env->GetArrayLength(src_);
     jsize siglen = env->GetArrayLength(sign_);
 
