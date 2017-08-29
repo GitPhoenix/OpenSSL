@@ -42,46 +42,61 @@ public class MainActivity extends AppCompatActivity {
         Log.i("body", "hmacSHA1签名编码->" + hmacSHA1 + "\n签名长度->" + hmacSHA1.length());
         tvSignature.setText(hmacSHA1);
 
-        Log.i("body", "MD5->摘要" + jni.MD5(TEST_DATA.getBytes()));
+        String encodeBySHA1 = jni.encodeBySHA1(TEST_DATA.getBytes());
+        Log.i("body", "SHA1签名->" + encodeBySHA1 + "\n签名长度->" + encodeBySHA1.length());
+
+        String encodeBySHA224 = jni.encodeBySHA224(TEST_DATA.getBytes());
+        Log.i("body", "SHA224签名->" + encodeBySHA224 + "\n签名长度->" + encodeBySHA224.length());
+
+        String encodeBySHA256 = jni.encodeBySHA256(TEST_DATA.getBytes());
+        Log.i("body", "SHA256签名->" + encodeBySHA256 + "\n签名长度->" + encodeBySHA256.length());
+
+        String encodeBySHA384 = jni.encodeBySHA384(TEST_DATA.getBytes());
+        Log.i("body", "SHA384签名->" + encodeBySHA384 + "\n签名长度->" + encodeBySHA384.length());
+
+        String encodeBySHA512 = jni.encodeBySHA512(TEST_DATA.getBytes());
+        Log.i("body", "SHA512签名->" + encodeBySHA512 + "\n签名长度->" + encodeBySHA512.length());
+
+        Log.i("body", "MD5信息摘要->" + jni.MD5(TEST_DATA.getBytes()));
 
         String xory = Base64.encodeToString(jni.xOr(TEST_DATA.getBytes()), Base64.NO_WRAP);
-        Log.i("body", "异或加密编码->" + xory);
-        Log.i("body",  "编码长度：->" + xory.length());
+        Log.i("body", "XOR异或加密编码->" + xory);
+        Log.i("body", "XOR异或加密编码长度：->" + xory.length());
         String xoryDec = new String(jni.xOr(Base64.decode(xory, Base64.NO_WRAP)));
-        Log.i("body", "异或解密->" + xoryDec);
-        Log.i("body", "解密后数据长度：->" + xoryDec.length());
+        Log.i("body", "XOR异或解密->" + xoryDec);
+        Log.i("body", "XOR异或解密后数据长度：->" + xoryDec.length());
 
         byte[] encodeAES = jni.encodeByAES(TEST_KEY.getBytes(), TEST_DATA.getBytes());
         String aesPsw = Base64.encodeToString(encodeAES, Base64.NO_WRAP);
         Log.i("body", "AES加密编码->" + aesPsw);
-        Log.i("body", "编码长度：->" + aesPsw.length());
+        Log.i("body", "AES加密编码长度：->" + aesPsw.length());
         byte[] decodeAES = jni.decodeByAES(TEST_KEY.getBytes(), Base64.decode(aesPsw, Base64.NO_WRAP));
         Log.i("body", "AES解密->" + new String(decodeAES));
-        Log.i("body", "AES解密长度->" + new String(decodeAES).length());
+        Log.i("body", "AES解密后数据长度->" + new String(decodeAES).length());
 
         byte[] encodeByRSAPubKey = jni.encodeByRSAPubKey(TEST_PUBLIC_KEY.getBytes(), TEST_DATA.getBytes());
         String encodeByPubKey = Base64.encodeToString(encodeByRSAPubKey, Base64.NO_WRAP);
         Log.i("body", "RSA公钥加密编码->" + encodeByPubKey);
-        Log.i("body",  "编码长度：->" + encodeByPubKey.length());
+        Log.i("body", "RSA公钥加密编码长度：->" + encodeByPubKey.length());
         byte[] decodeByRSAPrivateKey = jni.decodeByRSAPrivateKey(TEST_PRIVATE_KEY.getBytes(), encodeByRSAPubKey);
         String decodeByRSAPK = new String(decodeByRSAPrivateKey);
         Log.i("body", "RSA私钥解密->" + decodeByRSAPK);
-        Log.i("body", "RSA公加私解是否相同->" + TEST_DATA.equals(decodeByRSAPK));
+        Log.i("body", "RSA私钥解密后数据长度->" + decodeByRSAPK.length());
 
         byte[] encodeByRSAPrivateKey = jni.encodeByRSAPrivateKey(TEST_PRIVATE_KEY.getBytes(), TEST_DATA.getBytes());
         String encodeByPrivateKey = Base64.encodeToString(encodeByRSAPrivateKey, Base64.NO_WRAP);
         Log.i("body", "RSA私钥加密编码->" + encodeByPrivateKey);
-        Log.i("body", "编码长度：->" + encodeByPrivateKey.length());
+        Log.i("body", "RSA私钥加密编码长度：->" + encodeByPrivateKey.length());
         byte[] decodeByRSAPubKey = jni.decodeByRSAPubKey(TEST_PUBLIC_KEY.getBytes(), encodeByRSAPrivateKey);
         String decodeByPubKey = new String(decodeByRSAPubKey);
         Log.i("body", "RSA公钥解密->" + decodeByPubKey);
-        Log.i("body", "RSA私加公解是否相同->" + TEST_DATA.equals(decodeByPubKey));
+        Log.i("body", "RSA公钥解密后数据长度->" + decodeByPubKey.length());
 
         byte[] signByRSAPrivateKey = jni.signByRSAPrivateKey(TEST_PRIVATE_KEY.getBytes(), TEST_DATA.getBytes());
         String signByRSAKey = Base64.encodeToString(signByRSAPrivateKey, Base64.NO_WRAP);
         Log.i("body", "RSA私钥签名编码->" + signByRSAKey + "\n编码长度->" + signByRSAKey.length());
         int verifySign = jni.verifyByRSAPubKey(TEST_PUBLIC_KEY.getBytes(), TEST_DATA.getBytes(), signByRSAPrivateKey);
-        Log.i("body", "RSA公钥验证签名-> " + verifySign);
+        Log.i("body", "RSA公钥验证签名-> " + verifySign + "，1：验证成功");
 
     }
 

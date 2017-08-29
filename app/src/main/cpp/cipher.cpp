@@ -55,12 +55,12 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA1(JNIEnv *env, jobject instance,
     jsize src_Len = env->GetArrayLength(src_);
 
     char buff[SHA_DIGEST_LENGTH];
-    char hex[SHA_DIGEST_LENGTH];
+    char hex[SHA_DIGEST_LENGTH * 2];
     unsigned char digest[SHA_DIGEST_LENGTH];
 
-    SHA_CTX ctx;
-    SHA1((unsigned char *)src, src_Len, digest);
+//    SHA1((unsigned char *)src, src_Len, digest);
 
+    SHA_CTX ctx;
     SHA1_Init(&ctx);
     LOGI("SHA1->正在进行SHA1哈希计算");
     SHA1_Update(&ctx, src, src_Len);
@@ -88,12 +88,12 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA224(JNIEnv *env, jobject instanc
     jsize src_Len = env->GetArrayLength(src_);
 
     char buff[SHA224_DIGEST_LENGTH];
-    char hex[SHA224_DIGEST_LENGTH];
+    char hex[SHA224_DIGEST_LENGTH * 2];
     unsigned char digest[SHA224_DIGEST_LENGTH];
 
-    SHA256_CTX ctx;
-    SHA224((unsigned char *)src, src_Len, digest);
+//    SHA224((unsigned char *)src, src_Len, digest);
 
+    SHA256_CTX ctx;
     SHA224_Init(&ctx);
     LOGI("SHA224->正在进行SHA224哈希计算");
     SHA224_Update(&ctx, src, src_Len);
@@ -121,12 +121,12 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA256(JNIEnv *env, jobject instanc
     jsize src_Len = env->GetArrayLength(src_);
 
     char buff[SHA256_DIGEST_LENGTH];
-    char hex[SHA256_DIGEST_LENGTH];
+    char hex[SHA256_DIGEST_LENGTH * 2];
     unsigned char digest[SHA256_DIGEST_LENGTH];
 
-    SHA256_CTX ctx;
-    SHA256((unsigned char *)src, src_Len, digest);
+//    SHA256((unsigned char *)src, src_Len, digest);
 
+    SHA256_CTX ctx;
     SHA256_Init(&ctx);
     LOGI("SHA256->正在进行SHA256哈希计算");
     SHA256_Update(&ctx, src, src_Len);
@@ -154,12 +154,12 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA384(JNIEnv *env, jobject instanc
     jsize src_Len = env->GetArrayLength(src_);
 
     char buff[SHA384_DIGEST_LENGTH];
-    char hex[SHA384_DIGEST_LENGTH];
+    char hex[SHA384_DIGEST_LENGTH * 2];
     unsigned char digest[SHA384_DIGEST_LENGTH];
 
-    SHA512_CTX ctx;
-    SHA384((unsigned char *)src, src_Len, digest);
+//    SHA384((unsigned char *)src, src_Len, digest);
 
+    SHA512_CTX ctx;
     SHA384_Init(&ctx);
     LOGI("SHA384->正在进行SHA384哈希计算");
     SHA384_Update(&ctx, src, src_Len);
@@ -187,12 +187,12 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA512(JNIEnv *env, jobject instanc
     jsize src_Len = env->GetArrayLength(src_);
 
     char buff[SHA512_DIGEST_LENGTH];
-    char hex[SHA512_DIGEST_LENGTH];
+    char hex[SHA512_DIGEST_LENGTH * 2];
     unsigned char digest[SHA512_DIGEST_LENGTH];
 
-    SHA512_CTX ctx;
-    SHA512((unsigned char *)src, src_Len, digest);
+//    SHA512((unsigned char *)src, src_Len, digest);
 
+    SHA512_CTX ctx;
     SHA512_Init(&ctx);
     LOGI("SHA512->正在进行SHA256哈希计算");
     SHA512_Update(&ctx, src, src_Len);
@@ -317,10 +317,10 @@ Java_com_alley_openssl_util_JniUtils_encodeByRSAPubKey(JNIEnv *env, jobject inst
     BIO_free_all(keybio);
 
     int flen = RSA_size(rsa);
-    desText_len = (flen - 11) * ((src_Len / flen) + 1);
+    desText_len = flen * (src_Len / flen + 1);
 
     unsigned char *srcOrigin = (unsigned char *) malloc(src_Len);
-    unsigned char *cipherText = (unsigned char *) malloc(flen + 1);
+    unsigned char *cipherText = (unsigned char *) malloc(flen);
     unsigned char *desText = (unsigned char *) malloc(desText_len);
     memset(desText, 0, desText_len);
 
@@ -329,13 +329,13 @@ Java_com_alley_openssl_util_JniUtils_encodeByRSAPubKey(JNIEnv *env, jobject inst
 
     LOGI("RSA->进行公钥加密操作");
     //RSA_PKCS1_PADDING最大加密长度：128-11；RSA_NO_PADDING最大加密长度：128
-    for (int i = 0; i <= src_Len / flen; i++) {
-        src_flen = (i == src_Len / flen) ? src_Len % flen : flen - 11;
+    for (int i = 0; i <= src_Len / (flen - 11); i++) {
+        src_flen = (i == src_Len / (flen - 11)) ? src_Len % (flen - 11) : flen - 11;
         if (src_flen == 0) {
             break;
         }
 
-        memset(cipherText, 0, flen + 1);
+        memset(cipherText, 0, flen);
         ret = RSA_public_encrypt(src_flen, srcOrigin + src_offset, cipherText, rsa, RSA_PKCS1_PADDING);
 
         memcpy(desText + cipherText_offset, cipherText, ret);
@@ -351,15 +351,80 @@ Java_com_alley_openssl_util_JniUtils_encodeByRSAPubKey(JNIEnv *env, jobject inst
     env->ReleaseByteArrayElements(keys_, keys, 0);
     env->ReleaseByteArrayElements(src_, src, 0);
 
-    jbyteArray signature = env->NewByteArray(cipherText_offset);
+    jbyteArray cipher = env->NewByteArray(cipherText_offset);
     LOGI("RSA->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
-    env->SetByteArrayRegion(signature, 0, cipherText_offset, (jbyte *) desText);
+    env->SetByteArrayRegion(cipher, 0, cipherText_offset, (jbyte *) desText);
     LOGI("RSA->释放内存");
     free(srcOrigin);
     free(cipherText);
     free(desText);
 
-    return signature;
+    return cipher;
+}
+
+JNIEXPORT jbyteArray JNICALL
+Java_com_alley_openssl_util_JniUtils_decodeByRSAPrivateKey(JNIEnv *env, jobject instance, jbyteArray keys_, jbyteArray src_) {
+    LOGI("RSA->非对称密码算法，也就是说该算法需要一对密钥，使用其中一个加密，则需要用另一个才能解密");
+    jbyte *keys = env->GetByteArrayElements(keys_, NULL);
+    jbyte *src = env->GetByteArrayElements(src_, NULL);
+    jsize src_Len = env->GetArrayLength(src_);
+
+    int ret = 0, src_flen = 0, plaintext_offset = 0, descText_len = 0, src_offset = 0;
+
+    RSA *rsa = NULL;
+    BIO *keybio = NULL;
+
+    LOGI("RSA->从字符串读取RSA私钥");
+    keybio = BIO_new_mem_buf(keys, -1);
+    LOGI("RSA->从bio结构中得到RSA结构");
+    rsa = PEM_read_bio_RSAPrivateKey(keybio, NULL, NULL, NULL);
+    LOGI("RSA->释放BIO");
+    BIO_free_all(keybio);
+
+    int flen = RSA_size(rsa);
+    descText_len = (flen - 11) * (src_Len / flen + 1);
+
+    unsigned char *srcOrigin = (unsigned char *) malloc(src_Len);
+    unsigned char *plaintext = (unsigned char *) malloc(flen - 11);
+    unsigned char *desText = (unsigned char *) malloc(descText_len);
+    memset(desText, 0, descText_len);
+
+    memset(srcOrigin, 0, src_Len);
+    memcpy(srcOrigin, src, src_Len);
+
+    LOGI("RSA->进行私钥解密操作");
+    //一次性解密数据最大字节数RSA_size
+    for (int i = 0; i <= src_Len / flen; i++) {
+        src_flen = (i == src_Len / flen) ? src_Len % flen : flen;
+        if (src_flen == 0) {
+            break;
+        }
+
+        memset(plaintext, 0, flen - 11);
+        ret = RSA_private_decrypt(src_flen, srcOrigin + src_offset, plaintext, rsa, RSA_PKCS1_PADDING);
+
+        memcpy(desText + plaintext_offset, plaintext, ret);
+        plaintext_offset += ret;
+        src_offset += src_flen;
+    }
+
+    RSA_free(rsa);
+    LOGI("RSA->CRYPTO_cleanup_all_ex_data");
+    CRYPTO_cleanup_all_ex_data();
+
+    LOGI("RSA->从jni释放数据指针");
+    env->ReleaseByteArrayElements(keys_, keys, 0);
+    env->ReleaseByteArrayElements(src_, src, 0);
+
+    jbyteArray cipher = env->NewByteArray(plaintext_offset);
+    LOGI("RSA->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
+    env->SetByteArrayRegion(cipher, 0, plaintext_offset, (jbyte *) desText);
+    LOGI("RSA->释放内存");
+    free(srcOrigin);
+    free(plaintext);
+    free(desText);
+
+    return cipher;
 }
 
 JNIEXPORT jbyteArray JNICALL
@@ -382,10 +447,10 @@ Java_com_alley_openssl_util_JniUtils_encodeByRSAPrivateKey(JNIEnv *env, jobject 
     BIO_free_all(keybio);
 
     int flen = RSA_size(rsa);
-    desText_len = (flen - 11) * ((src_Len / flen) + 1);
+    desText_len = flen * (src_Len / flen + 1);
 
     unsigned char *srcOrigin = (unsigned char *) malloc(src_Len);
-    unsigned char *cipherText = (unsigned char *) malloc(flen + 1);
+    unsigned char *cipherText = (unsigned char *) malloc(flen);
     unsigned char *desText = (unsigned char *) malloc(desText_len);
     memset(desText, 0, desText_len);
 
@@ -394,13 +459,13 @@ Java_com_alley_openssl_util_JniUtils_encodeByRSAPrivateKey(JNIEnv *env, jobject 
 
     LOGI("RSA->进行私钥加密操作");
     //RSA_PKCS1_PADDING最大加密长度：128-11；RSA_NO_PADDING最大加密长度：128
-    for (int i = 0; i <= src_Len / flen; i++) {
-        src_flen = (i == src_Len / flen) ? src_Len % flen : flen - 11;
+    for (int i = 0; i <= src_Len / (flen - 11); i++) {
+        src_flen = (i == src_Len / (flen - 11)) ? src_Len % (flen - 11) : flen - 11;
         if (src_flen == 0) {
             break;
         }
 
-        memset(cipherText, 0, flen + 1);
+        memset(cipherText, 0, flen);
         ret = RSA_private_encrypt(src_flen, srcOrigin + src_offset, cipherText, rsa, RSA_PKCS1_PADDING);
 
         memcpy(desText + cipherText_offset, cipherText, ret);
@@ -416,80 +481,15 @@ Java_com_alley_openssl_util_JniUtils_encodeByRSAPrivateKey(JNIEnv *env, jobject 
     env->ReleaseByteArrayElements(keys_, keys, 0);
     env->ReleaseByteArrayElements(src_, src, 0);
 
-    jbyteArray signature = env->NewByteArray(cipherText_offset);
+    jbyteArray cipher = env->NewByteArray(cipherText_offset);
     LOGI("RSA->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
-    env->SetByteArrayRegion(signature, 0, cipherText_offset, (jbyte *) desText);
+    env->SetByteArrayRegion(cipher, 0, cipherText_offset, (jbyte *) desText);
     LOGI("RSA->释放内存");
     free(srcOrigin);
     free(cipherText);
     free(desText);
 
-    return signature;
-}
-
-JNIEXPORT jbyteArray JNICALL
-Java_com_alley_openssl_util_JniUtils_decodeByRSAPrivateKey(JNIEnv *env, jobject instance, jbyteArray keys_, jbyteArray src_) {
-    LOGI("RSA->非对称密码算法，也就是说该算法需要一对密钥，使用其中一个加密，则需要用另一个才能解密");
-    jbyte *keys = env->GetByteArrayElements(keys_, NULL);
-    jbyte *src = env->GetByteArrayElements(src_, NULL);
-    jsize src_Len = env->GetArrayLength(src_);
-
-    int ret = 0, src_flen = 0, plaintext_offset = 0, descText_len = 0, src_offset = 0;
-
-    RSA *rsa = NULL;
-    BIO *keybio = NULL;
-
-    LOGI("RSA->从字符串读取RSA私钥");
-    keybio = BIO_new_mem_buf(keys, -1);
-    LOGI("RSA->从bio结构中得到RSA结构");
-    rsa = PEM_read_bio_RSAPrivateKey(keybio, NULL, NULL, NULL);
-    LOGI("RSA->释放BIO");
-    BIO_free_all(keybio);
-
-    //一次性解密数据最大字节数RSA_size
-    int flen = RSA_size(rsa);
-    descText_len = flen * ((src_Len / flen) + 1);
-
-    unsigned char *srcOrigin = (unsigned char *) malloc(src_Len);
-    unsigned char *plaintext = (unsigned char *) malloc(flen);
-    unsigned char *desText = (unsigned char *) malloc(descText_len);
-    memset(desText, 0, descText_len);
-
-    memset(srcOrigin, 0, src_Len);
-    memcpy(srcOrigin, src, src_Len);
-
-    LOGI("RSA->进行私钥解密操作");
-    for (int i = 0; i <= src_Len / flen; i++) {
-        src_flen = (i == src_Len / flen) ? src_Len % flen : flen;
-        if (src_flen <= 0) {
-            break;
-        }
-
-        memset(plaintext, 0, flen);
-        ret = RSA_private_decrypt(src_flen, srcOrigin + src_offset, plaintext, rsa, RSA_PKCS1_PADDING);
-
-        memcpy(desText + plaintext_offset, plaintext, ret);
-        plaintext_offset += ret;
-        src_offset += src_flen;
-    }
-
-    RSA_free(rsa);
-    LOGI("RSA->CRYPTO_cleanup_all_ex_data");
-    CRYPTO_cleanup_all_ex_data();
-
-    LOGI("RSA->从jni释放数据指针");
-    env->ReleaseByteArrayElements(keys_, keys, 0);
-    env->ReleaseByteArrayElements(src_, src, 0);
-
-    jbyteArray signature = env->NewByteArray(plaintext_offset);
-    LOGI("RSA->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
-    env->SetByteArrayRegion(signature, 0, plaintext_offset, (jbyte *) desText);
-    LOGI("RSA->释放内存");
-    free(srcOrigin);
-    free(plaintext);
-    free(desText);
-
-    return signature;
+    return cipher;
 }
 
 JNIEXPORT jbyteArray JNICALL
@@ -511,12 +511,11 @@ Java_com_alley_openssl_util_JniUtils_decodeByRSAPubKey(JNIEnv *env, jobject inst
     LOGI("RSA->释放BIO");
     BIO_free_all(keybio);
 
-    //一次性解密数据最大字节数RSA_size
     int flen = RSA_size(rsa);
-    desText_len = flen * ((src_Len / flen) + 1);
+    desText_len = (flen - 11) * (src_Len / flen + 1);
 
     unsigned char *srcOrigin = (unsigned char *) malloc(src_Len);
-    unsigned char *plaintext = (unsigned char *) malloc(flen);
+    unsigned char *plaintext = (unsigned char *) malloc(flen - 11);
     unsigned char *desText = (unsigned char *) malloc(desText_len);
     memset(desText, 0, desText_len);
 
@@ -524,13 +523,14 @@ Java_com_alley_openssl_util_JniUtils_decodeByRSAPubKey(JNIEnv *env, jobject inst
     memcpy(srcOrigin, src, src_Len);
 
     LOGI("RSA->进行公钥解密操作");
+    //一次性解密数据最大字节数RSA_size
     for (int i = 0; i <= src_Len / flen; i++) {
         src_flen = (i == src_Len / flen) ? src_Len % flen : flen;
         if (src_flen <= 0) {
             break;
         }
 
-        memset(plaintext, 0, flen);
+        memset(plaintext, 0, flen - 11);
         ret = RSA_public_decrypt(src_flen, srcOrigin + src_offset, plaintext, rsa, RSA_PKCS1_PADDING);
 
         memcpy(desText + plaintext_offset, plaintext, ret);
@@ -546,15 +546,15 @@ Java_com_alley_openssl_util_JniUtils_decodeByRSAPubKey(JNIEnv *env, jobject inst
     env->ReleaseByteArrayElements(keys_, keys, 0);
     env->ReleaseByteArrayElements(src_, src, 0);
 
-    jbyteArray signature = env->NewByteArray(plaintext_offset);
+    jbyteArray cipher = env->NewByteArray(plaintext_offset);
     LOGI("RSA->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
-    env->SetByteArrayRegion(signature, 0, plaintext_offset, (jbyte *) desText);
+    env->SetByteArrayRegion(cipher, 0, plaintext_offset, (jbyte *) desText);
     LOGI("RSA->释放内存");
-    free(src);
+    free(srcOrigin);
     free(plaintext);
     free(desText);
 
-    return signature;
+    return cipher;
 }
 
 JNIEXPORT jbyteArray JNICALL
@@ -591,13 +591,13 @@ Java_com_alley_openssl_util_JniUtils_signByRSAPrivateKey(JNIEnv *env, jobject in
     env->ReleaseByteArrayElements(keys_, keys, 0);
     env->ReleaseByteArrayElements(src_, src, 0);
 
-    jbyteArray signature = env->NewByteArray(siglen);
+    jbyteArray cipher = env->NewByteArray(siglen);
     LOGI("RSA->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
-    env->SetByteArrayRegion(signature, 0, siglen, (jbyte *) sign);
+    env->SetByteArrayRegion(cipher, 0, siglen, (jbyte *) sign);
     LOGI("RSA->释放内存");
     free(sign);
 
-    return signature;
+    return cipher;
 }
 
 JNIEXPORT jint JNICALL
@@ -658,13 +658,13 @@ Java_com_alley_openssl_util_JniUtils_xOr(JNIEnv *env, jobject instance, jbyteArr
     LOGI("XOR->从jni释放数据指针");
     env->ReleaseByteArrayElements(src_, src, 0);
 
-    jbyteArray result = env->NewByteArray(src_Len);
+    jbyteArray cipher = env->NewByteArray(src_Len);
     LOGI("XOR->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
-    env->SetByteArrayRegion(result, 0, src_Len, (const jbyte *) chs);
+    env->SetByteArrayRegion(cipher, 0, src_Len, (const jbyte *) chs);
     LOGI("XOR->释放内存");
     free(chs);
 
-    return result;
+    return cipher;
 }
 
 JNIEXPORT jstring JNICALL

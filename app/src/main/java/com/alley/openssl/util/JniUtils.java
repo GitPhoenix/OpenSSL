@@ -5,7 +5,7 @@ public class JniUtils {
 
     static {
         System.loadLibrary("crypto");
-        System.loadLibrary("signature");
+        System.loadLibrary("cipher");
     }
 
     /**
