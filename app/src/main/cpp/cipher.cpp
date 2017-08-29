@@ -19,7 +19,7 @@ extern "C" {
 JNIEXPORT jbyteArray JNICALL
 Java_com_alley_openssl_util_JniUtils_encodeByHmacSHA1(JNIEnv *env, jobject instance, jbyteArray src_) {
     LOGI("HmacSHA1->HMAC: Hash-based Message Authentication Code，即基于Hash的消息鉴别码");
-    const char *key = "zsdApp@2238700@4008555056";
+    const char *key = "alleyApp@22383243-335457968";
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jsize src_Len = env->GetArrayLength(src_);
 
@@ -247,13 +247,13 @@ Java_com_alley_openssl_util_JniUtils_encodeByAES(JNIEnv *env, jobject instance, 
     env->ReleaseByteArrayElements(keys_, keys, 0);
     env->ReleaseByteArrayElements(src_, src, 0);
 
-    jbyteArray signature = env->NewByteArray(cipherText_len);
+    jbyteArray cipher = env->NewByteArray(cipherText_len);
     LOGI("AES->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
-    env->SetByteArrayRegion(signature, 0, cipherText_len, (jbyte *) out);
+    env->SetByteArrayRegion(cipher, 0, cipherText_len, (jbyte *) out);
     LOGI("AES->释放内存");
     free(out);
 
-    return signature;
+    return cipher;
 }
 
 JNIEXPORT jbyteArray JNICALL
@@ -288,13 +288,13 @@ Java_com_alley_openssl_util_JniUtils_decodeByAES(JNIEnv *env, jobject instance, 
     env->ReleaseByteArrayElements(keys_, keys, 0);
     env->ReleaseByteArrayElements(src_, src, 0);
 
-    jbyteArray signature = env->NewByteArray(plaintext_len);
+    jbyteArray cipher = env->NewByteArray(plaintext_len);
     LOGI("AES->在堆中分配ByteArray数组对象成功，将拷贝数据到数组中");
-    env->SetByteArrayRegion(signature, 0, plaintext_len, (jbyte *) out);
+    env->SetByteArrayRegion(cipher, 0, plaintext_len, (jbyte *) out);
     LOGI("AES->释放内存");
     free(out);
 
-    return signature;
+    return cipher;
 }
 
 JNIEXPORT jbyteArray JNICALL
@@ -526,7 +526,7 @@ Java_com_alley_openssl_util_JniUtils_decodeByRSAPubKey(JNIEnv *env, jobject inst
     //一次性解密数据最大字节数RSA_size
     for (int i = 0; i <= src_Len / flen; i++) {
         src_flen = (i == src_Len / flen) ? src_Len % flen : flen;
-        if (src_flen <= 0) {
+        if (src_flen == 0) {
             break;
         }
 
@@ -641,7 +641,7 @@ Java_com_alley_openssl_util_JniUtils_verifyByRSAPubKey(JNIEnv *env, jobject inst
 JNIEXPORT jbyteArray JNICALL
 Java_com_alley_openssl_util_JniUtils_xOr(JNIEnv *env, jobject instance, jbyteArray src_) {
     LOGI("XOR->异或加解密: 相同为假，不同为真");
-    const char keys[] = "zsd2238700";
+    const char keys[] = "alley20170829";
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jsize src_Len = env->GetArrayLength(src_);
 
@@ -675,18 +675,20 @@ Java_com_alley_openssl_util_JniUtils_MD5(JNIEnv *env, jobject instance, jbyteArr
 
     char buff[3] = {'\0'};
     char hex[33] = {'\0'};
-    unsigned char md5Text[MD5_DIGEST_LENGTH];
+    unsigned char digest[MD5_DIGEST_LENGTH];
+
+//    MD5((const unsigned char *) src, src_Len, digest);
 
     MD5_CTX ctx;
     MD5_Init(&ctx);
     LOGI("MD5->进行MD5消息摘要计算");
     MD5_Update(&ctx, src, src_Len);
-    MD5_Final(md5Text, &ctx);
+    MD5_Final(digest, &ctx);
 
     strcpy(hex, "");
     LOGI("MD5->把哈希值按%%02x格式定向到缓冲区");
-    for (int i = 0; i != sizeof(md5Text); i++) {
-        sprintf(buff, "%02x", md5Text[i]);
+    for (int i = 0; i != sizeof(digest); i++) {
+        sprintf(buff, "%02x", digest[i]);
         strcat(hex, buff);
     }
     LOGI("MD5->%s", hex);
