@@ -217,16 +217,16 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA512(JNIEnv *env, jobject instanc
 JNIEXPORT jbyteArray JNICALL
 Java_com_alley_openssl_util_JniUtils_encodeByAES(JNIEnv *env, jobject instance, jbyteArray keys_, jbyteArray src_) {
     LOGI("AES->对称密钥，也就是说加密和解密用的是同一个密钥");
-    const unsigned char *iv = (const unsigned char *) "01234567890123456";
+    const unsigned char *iv = (const unsigned char *) "0123456789012345";
     jbyte *keys = env->GetByteArrayElements(keys_, NULL);
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jsize src_Len = env->GetArrayLength(src_);
 
     int outlen = 0, cipherText_len = 0;
 
-    unsigned char *out = (unsigned char *) malloc(src_Len);
+    unsigned char *out = (unsigned char *) malloc((src_Len / 16 + 1) * 16);
     //清空内存空间
-    memset(out, 0, src_Len);
+    memset(out, 0, (src_Len / 16 + 1) * 16);
 
     EVP_CIPHER_CTX ctx;
     EVP_CIPHER_CTX_init(&ctx);
@@ -259,7 +259,7 @@ Java_com_alley_openssl_util_JniUtils_encodeByAES(JNIEnv *env, jobject instance, 
 JNIEXPORT jbyteArray JNICALL
 Java_com_alley_openssl_util_JniUtils_decodeByAES(JNIEnv *env, jobject instance, jbyteArray keys_, jbyteArray src_) {
     LOGI("AES->对称密钥，也就是说加密和解密用的是同一个密钥");
-    const unsigned char *iv = (const unsigned char *) "01234567890123456";
+    const unsigned char *iv = (const unsigned char *) "0123456789012345";
     jbyte *keys = env->GetByteArrayElements(keys_, NULL);
     jbyte *src = env->GetByteArrayElements(src_, NULL);
     jsize src_Len = env->GetArrayLength(src_);
@@ -317,7 +317,7 @@ Java_com_alley_openssl_util_JniUtils_encodeByRSAPubKey(JNIEnv *env, jobject inst
     BIO_free_all(keybio);
 
     int flen = RSA_size(rsa);
-    desText_len = flen * (src_Len / flen + 1);
+    desText_len = flen * (src_Len / (flen - 11) + 1);
 
     unsigned char *srcOrigin = (unsigned char *) malloc(src_Len);
     unsigned char *cipherText = (unsigned char *) malloc(flen);
@@ -447,7 +447,7 @@ Java_com_alley_openssl_util_JniUtils_encodeByRSAPrivateKey(JNIEnv *env, jobject 
     BIO_free_all(keybio);
 
     int flen = RSA_size(rsa);
-    desText_len = flen * (src_Len / flen + 1);
+    desText_len = flen * (src_Len / (flen - 11) + 1);
 
     unsigned char *srcOrigin = (unsigned char *) malloc(src_Len);
     unsigned char *cipherText = (unsigned char *) malloc(flen);
