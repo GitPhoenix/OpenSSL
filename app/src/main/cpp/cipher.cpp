@@ -6,14 +6,20 @@
 #include<openssl/pem.h>
 #include <openssl/md5.h>
 
-
-#define TAG "body"
+#if 1
+#define TAG "cipher"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, TAG, __VA_ARGS__)
 #define LOGF(...) __android_log_print(ANDROID_LOG_FATAL, TAG ,__VA_ARGS__)
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, TAG ,__VA_ARGS__)
-
+#else
+#define LOGI(...)
+#define LOGD(...)
+#define LOGE(...)
+#define LOGF(...)
+#define LOGW(...)
+#endif
 
 extern "C" {
 JNIEXPORT jbyteArray JNICALL
@@ -28,7 +34,7 @@ Java_com_alley_openssl_util_JniUtils_encodeByHmacSHA1(JNIEnv *env, jobject insta
     char buff[EVP_MAX_MD_SIZE];
     char hex[EVP_MAX_MD_SIZE];
 
-    LOGI("HmacSHA1->调用函数进行哈希计算");
+    LOGI("HmacSHA1->调用函数进行哈希运算");
     HMAC(EVP_sha1(), key, strlen(key), (unsigned char *) src, src_Len, result, &result_len);
 
     strcpy(hex, "");
@@ -62,7 +68,7 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA1(JNIEnv *env, jobject instance,
 
     SHA_CTX ctx;
     SHA1_Init(&ctx);
-    LOGI("SHA1->正在进行SHA1哈希计算");
+    LOGI("SHA1->正在进行SHA1哈希运算");
     SHA1_Update(&ctx, src, src_Len);
     SHA1_Final(digest, &ctx);
 
@@ -95,7 +101,7 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA224(JNIEnv *env, jobject instanc
 
     SHA256_CTX ctx;
     SHA224_Init(&ctx);
-    LOGI("SHA224->正在进行SHA224哈希计算");
+    LOGI("SHA224->正在进行SHA224哈希运算");
     SHA224_Update(&ctx, src, src_Len);
     SHA224_Final(digest, &ctx);
 
@@ -128,7 +134,7 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA256(JNIEnv *env, jobject instanc
 
     SHA256_CTX ctx;
     SHA256_Init(&ctx);
-    LOGI("SHA256->正在进行SHA256哈希计算");
+    LOGI("SHA256->正在进行SHA256哈希运算");
     SHA256_Update(&ctx, src, src_Len);
     SHA256_Final(digest, &ctx);
 
@@ -161,7 +167,7 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA384(JNIEnv *env, jobject instanc
 
     SHA512_CTX ctx;
     SHA384_Init(&ctx);
-    LOGI("SHA384->正在进行SHA384哈希计算");
+    LOGI("SHA384->正在进行SHA384哈希运算");
     SHA384_Update(&ctx, src, src_Len);
     SHA384_Final(digest, &ctx);
 
@@ -194,7 +200,7 @@ Java_com_alley_openssl_util_JniUtils_encodeBySHA512(JNIEnv *env, jobject instanc
 
     SHA512_CTX ctx;
     SHA512_Init(&ctx);
-    LOGI("SHA512->正在进行SHA256哈希计算");
+    LOGI("SHA512->正在进行SHA256哈希运算");
     SHA512_Update(&ctx, src, src_Len);
     SHA512_Final(digest, &ctx);
 
@@ -232,11 +238,11 @@ Java_com_alley_openssl_util_JniUtils_encodeByAES(JNIEnv *env, jobject instance, 
     EVP_CIPHER_CTX_init(&ctx);
     LOGI("AES->指定加密算法，初始化加密key/iv");
     EVP_EncryptInit_ex(&ctx, EVP_aes_128_cbc(), NULL, (const unsigned char *) keys, iv);
-    LOGI("AES->进行加密操作");
+    LOGI("AES->对数据进行加密运算");
     EVP_EncryptUpdate(&ctx, out, &outlen, (const unsigned char *) src, src_Len);
     cipherText_len = outlen;
 
-    LOGI("AES->结束加密操作");
+    LOGI("AES->结束加密运算");
     EVP_EncryptFinal_ex(&ctx, out + outlen, &outlen);
     cipherText_len += outlen;
 
@@ -273,11 +279,11 @@ Java_com_alley_openssl_util_JniUtils_decodeByAES(JNIEnv *env, jobject instance, 
     EVP_CIPHER_CTX_init(&ctx);
     LOGI("AES->指定解密算法，初始化解密key/iv");
     EVP_DecryptInit_ex(&ctx, EVP_aes_128_cbc(), NULL, (const unsigned char *) keys, iv);
-    LOGI("AES->进行解密操作");
+    LOGI("AES->对数据进行解密运算");
     EVP_DecryptUpdate(&ctx, out, &outlen, (const unsigned char *) src, src_Len);
     plaintext_len = outlen;
 
-    LOGI("AES->结束解密操作");
+    LOGI("AES->结束解密运算");
     EVP_DecryptFinal_ex(&ctx, out + outlen, &outlen);
     plaintext_len += outlen;
 
@@ -327,7 +333,7 @@ Java_com_alley_openssl_util_JniUtils_encodeByRSAPubKey(JNIEnv *env, jobject inst
     memset(srcOrigin, 0, src_Len);
     memcpy(srcOrigin, src, src_Len);
 
-    LOGI("RSA->进行公钥加密操作");
+    LOGI("RSA->对数据进行公钥加密运算");
     //RSA_PKCS1_PADDING最大加密长度：128-11；RSA_NO_PADDING最大加密长度：128
     for (int i = 0; i <= src_Len / (flen - 11); i++) {
         src_flen = (i == src_Len / (flen - 11)) ? src_Len % (flen - 11) : flen - 11;
@@ -392,7 +398,7 @@ Java_com_alley_openssl_util_JniUtils_decodeByRSAPrivateKey(JNIEnv *env, jobject 
     memset(srcOrigin, 0, src_Len);
     memcpy(srcOrigin, src, src_Len);
 
-    LOGI("RSA->进行私钥解密操作");
+    LOGI("RSA->对数据进行私钥解密运算");
     //一次性解密数据最大字节数RSA_size
     for (int i = 0; i <= src_Len / flen; i++) {
         src_flen = (i == src_Len / flen) ? src_Len % flen : flen;
@@ -457,7 +463,7 @@ Java_com_alley_openssl_util_JniUtils_encodeByRSAPrivateKey(JNIEnv *env, jobject 
     memset(srcOrigin, 0, src_Len);
     memcpy(srcOrigin, src, src_Len);
 
-    LOGI("RSA->进行私钥加密操作");
+    LOGI("RSA->对数据进行私钥加密运算");
     //RSA_PKCS1_PADDING最大加密长度：128-11；RSA_NO_PADDING最大加密长度：128
     for (int i = 0; i <= src_Len / (flen - 11); i++) {
         src_flen = (i == src_Len / (flen - 11)) ? src_Len % (flen - 11) : flen - 11;
@@ -522,7 +528,7 @@ Java_com_alley_openssl_util_JniUtils_decodeByRSAPubKey(JNIEnv *env, jobject inst
     memset(srcOrigin, 0, src_Len);
     memcpy(srcOrigin, src, src_Len);
 
-    LOGI("RSA->进行公钥解密操作");
+    LOGI("RSA->对数据进行公钥解密运算");
     //一次性解密数据最大字节数RSA_size
     for (int i = 0; i <= src_Len / flen; i++) {
         src_flen = (i == src_Len / flen) ? src_Len % flen : flen;
@@ -580,7 +586,9 @@ Java_com_alley_openssl_util_JniUtils_signByRSAPrivateKey(JNIEnv *env, jobject in
     unsigned char *sign = (unsigned char *) malloc(129);
     memset(sign, 0, 129);
 
+    LOGI("RSA->对数据进行摘要运算");
     SHA1((const unsigned char *) src, src_Len, digest);
+    LOGI("RSA->对摘要进行RSA私钥加密");
     RSA_sign(NID_sha1, digest, SHA_DIGEST_LENGTH, sign, &siglen, rsa);
 
     RSA_free(rsa);
@@ -623,7 +631,9 @@ Java_com_alley_openssl_util_JniUtils_verifyByRSAPubKey(JNIEnv *env, jobject inst
     LOGI("RSA->释放BIO");
     BIO_free_all(keybio);
 
+    LOGI("RSA->对数据进行摘要运算");
     SHA1((const unsigned char *) src, src_Len, digest);
+    LOGI("RSA->对摘要进行RSA公钥验证");
     ret = RSA_verify(NID_sha1, digest, SHA_DIGEST_LENGTH, (const unsigned char *) sign, siglen, rsa);
 
     RSA_free(rsa);
@@ -649,6 +659,7 @@ Java_com_alley_openssl_util_JniUtils_xOr(JNIEnv *env, jobject instance, jbyteArr
     memset(chs, 0, src_Len);
     memcpy(chs, src, src_Len);
 
+    LOGI("XOR->对数据进行异或运算");
     for (int i = 0; i < src_Len; i++) {
         *chs = *chs ^ keys[i % strlen(keys)];
         chs++;
@@ -681,7 +692,7 @@ Java_com_alley_openssl_util_JniUtils_MD5(JNIEnv *env, jobject instance, jbyteArr
 
     MD5_CTX ctx;
     MD5_Init(&ctx);
-    LOGI("MD5->进行MD5消息摘要计算");
+    LOGI("MD5->进行MD5信息摘要运算");
     MD5_Update(&ctx, src, src_Len);
     MD5_Final(digest, &ctx);
 
