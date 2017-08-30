@@ -2,12 +2,12 @@
 
 ### OpenSSL系列文章：
 ##### 一、[Android CMake轻松实现基于OpenSSL的HmacSHA1签名](http://www.jianshu.com/p/07df7626b4ee)
-##### 二、[Android CMake轻松实现基于OpenSSL的SHA(1-512)签名]()
-##### 三、[Android CMake轻松实现基于OpenSSL的MD5信息摘要&异或加解密]()
-##### 四、[Android CMake轻松实现基于OpenSSL的AES加解密]()
-##### 五、[Android CMake轻松实现基于OpenSSL的RSA加解密]()
-##### 六、[Android CMake轻松实现基于OpenSSL的RSA签名和验证]()
-##### 七、[在Retrofit的基础上结合OpenSSL实现服务器和客户端之间数据加密通信]()
+##### 二、[Android CMake轻松实现基于OpenSSL的SHA(1-512)签名](http://www.jianshu.com/p/4804f176daaf)
+##### 三、[Android CMake轻松实现基于OpenSSL的MD5信息摘要&异或加解密](http://www.jianshu.com/p/768d8be14b93)
+##### 四、[Android CMake轻松实现基于OpenSSL的AES加解密](http://www.jianshu.com/p/3f09a048a2cc)
+##### 五、[Android CMake轻松实现基于OpenSSL的RSA加解密](http://www.jianshu.com/p/04eba47f7c07)
+##### 六、[Android CMake轻松实现基于OpenSSL的RSA签名和验证](http://www.jianshu.com/p/18f1380e7922)
+##### 七、[在Retrofit的基础上结合OpenSSL实现服务器和客户端之间数据加密通信](http://www.jianshu.com/p/970a8331143f)
 
 ### License
 ```
