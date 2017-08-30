@@ -84,15 +84,6 @@ public class JniUtils {
     public native byte[] encodeByRSAPubKey(byte[] keys, byte[] src);
 
     /**
-     * RSA私钥加密
-     *
-     * @param keys
-     * @param src
-     * @return
-     */
-    public native byte[] encodeByRSAPrivateKey(byte[] keys, byte[] src);
-
-    /**
      * RSA私钥解密
      *
      * @param keys
@@ -100,6 +91,15 @@ public class JniUtils {
      * @return
      */
     public native byte[] decodeByRSAPrivateKey(byte[] keys, byte[] src);
+
+    /**
+     * RSA私钥加密
+     *
+     * @param keys
+     * @param src
+     * @return
+     */
+    public native byte[] encodeByRSAPrivateKey(byte[] keys, byte[] src);
 
     /**
      * RSA公钥解密
