@@ -1,10 +1,11 @@
-package com.alley.openssl;
+package com.alley.openssl.activity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.Log;
 
+import com.alley.openssl.R;
 import com.alley.openssl.util.JniUtils;
 
 public class MainActivity extends AppCompatActivity {
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
         JniUtils jni = new JniUtils();
 
         Log.i(TAG, "原始数据长度：->" + TEST_DATA.length());
-        byte[] encodeByHmacSHA1 = jni.encodeByHmacSHA1(TEST_DATA.getBytes());
+        byte[] encodeByHmacSHA1 = jni.encodeByHmacSHA1(this, TEST_DATA.getBytes());
         String hmacSHA1 = Base64.encodeToString(encodeByHmacSHA1, Base64.NO_WRAP);
         Log.i(TAG, "hmacSHA1签名编码->" + hmacSHA1 + "\n签名长度->" + hmacSHA1.length());
 
@@ -50,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         String encodeBySHA512 = jni.encodeBySHA512(TEST_DATA.getBytes());
         Log.i(TAG, "SHA512签名->" + encodeBySHA512 + "\n签名长度->" + encodeBySHA512.length());
 
-        Log.i(TAG, "MD5信息摘要->" + jni.MD5(TEST_DATA.getBytes()).toUpperCase());
+        Log.i(TAG, "MD5信息摘要->" + jni.md5(TEST_DATA.getBytes()).toUpperCase());
 
         String xory = Base64.encodeToString(jni.xOr(TEST_DATA.getBytes()), Base64.NO_WRAP);
         Log.i(TAG, "XOR异或加密编码->" + xory);
@@ -91,7 +92,8 @@ public class MainActivity extends AppCompatActivity {
         int verifySign = jni.verifyByRSAPubKey(TEST_PUBLIC_KEY.getBytes(), TEST_DATA.getBytes(), signByRSAPrivateKey);
         Log.i(TAG, "RSA公钥验证签名-> " + verifySign + "，1：验证成功");
 
-
+        Log.i(TAG, "sha1OfApk-> " + jni.sha1OfApk(this));
+        Log.i(TAG, "验证apk签名-> " + jni.verifySha1OfApk(this));
     }
 
     private void initEvent() {

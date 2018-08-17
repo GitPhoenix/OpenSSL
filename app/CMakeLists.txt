@@ -2,24 +2,17 @@
 # documentation: https://d.android.com/studio/projects/add-native-code.html
 
 # Sets the minimum version of CMake required to build the native library.
+
 cmake_minimum_required(VERSION 3.4.1)
-#C++编译
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
 #配置加载头文件
 include_directories(E:/AndroidSpace/OpenSSL/app/alley/include)
-
-#动态方式加载
-add_library(openssl SHARED IMPORTED )
-add_library(ssl SHARED IMPORTED )
-#引入第三方.so库
-set_target_properties(openssl PROPERTIES IMPORTED_LOCATION E:/AndroidSpace/OpenSSL/app/alley/lib/${ANDROID_ABI}/libcrypto.so)
-set_target_properties(ssl PROPERTIES IMPORTED_LOCATION E:/AndroidSpace/OpenSSL/app/alley/lib/${ANDROID_ABI}/libssl.so)
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
+
 add_library( # Sets the name of the library.
              cipher
 
@@ -27,7 +20,14 @@ add_library( # Sets the name of the library.
              SHARED
 
              # Provides a relative path to your source file(s).
-             src/main/cpp/cipher.cpp )
+             src/main/cpp/cipher.cpp src/main/cpp/zsd.cpp )
+
+#动态方式加载
+add_library(openssl SHARED IMPORTED )
+add_library(ssl SHARED IMPORTED )
+#引入第三方.so库
+set_target_properties(openssl PROPERTIES IMPORTED_LOCATION E:/AndroidSpace/OpenSSL/app/alley/lib/${ANDROID_ABI}/libcrypto.so)
+set_target_properties(ssl PROPERTIES IMPORTED_LOCATION E:/AndroidSpace/OpenSSL/app/alley/lib/${ANDROID_ABI}/libssl.so)
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by

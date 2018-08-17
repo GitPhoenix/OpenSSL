@@ -1,6 +1,8 @@
 package com.alley.openssl.util;
 
 
+import android.content.Context;
+
 public class JniUtils {
 
     static {
@@ -11,10 +13,11 @@ public class JniUtils {
     /**
      * HmacSHA1签名
      *
+     * @param context
      * @param src
      * @return
      */
-    public native byte[] encodeByHmacSHA1(byte[] src);
+    public native byte[] encodeByHmacSHA1(Context context, byte[] src);
 
     /**
      * SHA1签名
@@ -143,5 +146,21 @@ public class JniUtils {
      * @param src
      * @return 默认小写
      */
-    public native String MD5(byte[] src);
+    public native String md5(byte[] src);
+
+    /**
+     * 获取apk-sha1
+     *
+     * @param context
+     * @return
+     */
+    public native String sha1OfApk(Context context);
+
+    /**
+     * 校验apk签名是否有效
+     *
+     * @param context
+     * @return
+     */
+    public native boolean verifySha1OfApk(Context context);
 }
